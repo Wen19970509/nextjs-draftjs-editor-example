@@ -585,6 +585,7 @@ const DraftEditor = () => {
                         blockStyleFn={blockStyleFn}
                         blockRenderMap={blockRenderMap}
                         keyBindingFn={keyBindingFn}
+                        // @ts-expect-error
                         handleKeyCommand={keyCommand}
                     />
                 )}
@@ -592,12 +593,13 @@ const DraftEditor = () => {
                 <div ref={toolbarRef} style={toolbarStyle} className='rounded-md bg-gray-800'>
                     <ToolBar />
                 </div>
+                {/* 開啟顯示原始資料 */}
+                {/* <div>
+                    <h1 className='text-red-900'>RAW DATA 原始資料</h1>
+                    {JSON.stringify(convertToRaw(editorState.getCurrentContent()))}
+                </div> */}
             </div>
-            <br />
-            {/* <div>
-                <h1 className='text-red-900'>RAW DATA 原始資料</h1>
-                {JSON.stringify(convertToRaw(editorState.getCurrentContent()))}
-            </div> */}
+            {/* 輸出成HTML格式 */}
             {/* <HtmlRender state={editorState.getCurrentContent()} /> */}
         </div>
     );

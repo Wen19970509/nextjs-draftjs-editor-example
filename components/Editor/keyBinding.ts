@@ -11,15 +11,3 @@ export const keyBindingFn = (e: KeyboardEvent<{}>) => {
     }
     return getDefaultKeyBinding(e);
 };
-
-const keyCommand = ({ command, editorState, setEditorState }) => {
-    if (command === 'Shift_Enter') {
-        setEditorState(RichUtils.insertSoftNewline(editorState));
-    }
-    if (command === 'Enter') {
-        const currentContent = editorState.getCurrentContent();
-        const selection = editorState.getSelection();
-        const textWithEntity = Modifier.splitBlock(currentContent, selection);
-        setEditorState(EditorState.push(editorState, textWithEntity, 'split-block'));
-    }
-};
