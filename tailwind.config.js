@@ -5,6 +5,7 @@ module.exports = {
         extend: {
             backgroundColor: ['disabled'],
             borderColor: ['disabled'],
+            opacity: ['disabled'],
         },
     },
 };

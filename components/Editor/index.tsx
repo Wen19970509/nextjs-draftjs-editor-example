@@ -1,16 +1,26 @@
-import { Editor, EditorState, RichUtils, AtomicBlockUtils, Modifier, CompositeDecorator, EditorBlock, genKey, ContentBlock, convertToRaw } from 'draft-js';
+import {
+    Editor,
+    EditorState,
+    RichUtils,
+    AtomicBlockUtils,
+    Modifier,
+    CompositeDecorator,
+    EditorBlock,
+    genKey,
+    ContentBlock,
+    convertToRaw,
+    SelectionState,
+} from 'draft-js';
 import { useEffect, useState, useRef } from 'react';
 import Immutable from 'immutable';
-import HtmlRender from './HtmlRender';
 import { keyBindingFn } from './keyBinding';
-import { emptyContentState, emptyTitleState, inlineStyleMap, blockRenderMap, blockStyleFn } from './rendermaps';
+import { emptyContentState, inlineStyleMap, blockRenderMap, blockStyleFn } from './rendermaps';
 import HyperLink from './HyperLink/service';
 //draft.css needs
 import 'draft-js/dist/Draft.css';
 
 const DraftEditor = () => {
     const [editorState, setEditorState] = useState(EditorState.createWithContent(emptyContentState, HyperLink.decorator));
-    const [titleState, setTitleState] = useState(EditorState.createWithContent(emptyTitleState));
     const [editor, seteditor] = useState(false);
     const [showToolbar, setShowToolbar] = useState(false);
     const [showAddImg, setShowAddImg] = useState(false);
@@ -93,7 +103,7 @@ const DraftEditor = () => {
 
         setToolbarCoordinates(coordinates);
     }, [toolbarMeasures]);
-    //Toolbar
+    //Toolbar 反白工具列
     const ToolbarButton = (props) => {
         const toggleToolbar = (e) => {
             e.preventDefault();
@@ -164,7 +174,24 @@ const DraftEditor = () => {
         padding: 2,
     } as React.CSSProperties;
 
-    //side toolbar
+    function reSetStyles() {
+        const selectionState = editorState.getSelection();
+        const anchorKey = selectionState.getAnchorKey();
+        const currentContent = editorState.getCurrentContent();
+        const currentBlock = currentContent.getBlockForKey(anchorKey);
+        const start = selectionState.getStartOffset();
+        const end = selectionState.getEndOffset();
+        // Selected Text
+        const selectedText = currentBlock.getText().slice(start, end);
+
+        console.log(selectionState);
+        const contentWithoutStyles = Modifier.replaceText(editorState.getCurrentContent(), selectionState, selectedText, null);
+
+        const newstate = EditorState.push(editorState, contentWithoutStyles, 'change-inline-style');
+
+        setEditorState(newstate);
+    }
+    //side toolbar 側邊工具列
     const SideToolbarBtn = ({ active, sideBarItem }) => {
         const btnToggle = (e) => {
             e.preventDefault();
@@ -172,6 +199,11 @@ const DraftEditor = () => {
                 setShowAddImg(true);
             } else if (sideBarItem.media === 'cards') {
                 addCard();
+            } else if (sideBarItem.type.match('header')) {
+                reSetStyles();
+                const newState = RichUtils.toggleBlockType(editorState, sideBarItem.type);
+
+                // setEditorState(newEditorState);
             } else {
                 setEditorState(RichUtils.toggleBlockType(editorState, sideBarItem.type));
             }
@@ -193,8 +225,7 @@ const DraftEditor = () => {
             { label: 'format_list_bulleted', type: 'unordered-list-item' },
             { label: 'format_list_numbered', type: 'ordered-list-item' },
             { label: 'image', media: 'imageURL' },
-            { label: 'add_photo_alternate', media: 'uploadImage' },
-            { label: 'apps', media: 'cards' },
+            // { label: 'apps', media: 'cards' },
         ];
 
         let currentBlockType = RichUtils.getCurrentBlockType(editorState);
@@ -207,7 +238,7 @@ const DraftEditor = () => {
         );
     };
 
-    // Cards
+    // Cards 客製Block  (未啟用)
     const Card = (props) => {
         return (
             <div>
@@ -278,8 +309,7 @@ const DraftEditor = () => {
         return EditorState.push(editorState, newContent, 'split-block');
     }
 
-    //////////
-    // media 照片
+    // media 照片URL
     const [input, setInput] = useState('');
     const [showImgTool, setShowImgTool] = useState(false);
     const [urlValue, setUrlValue] = useState('');
@@ -338,26 +368,11 @@ const DraftEditor = () => {
                 return prevShowImgTool ? false : true;
             });
         };
-        const handleFull = (key) => {
-            if (!!key) {
-                const element = document.getElementById(key);
-                console.log(element);
-                element.classList.toggle('w-4/5');
-                element.classList.toggle('w-full');
-            }
-        };
         if (props.src) {
             return (
-                <div className='w-full' onClick={handleImgClick}>
+                <div className='w-full'>
                     <div id={props.blockKey} className='relative w-4/5 mx-auto '>
                         <img className='w-full ' id={props.src} src={props.src} />
-                        {/* <div
-                            className=' text-gray-800 flex p-2  hover:opacity-100 transform duration-300 cursor-pointer absolute top-2 left-2 rounded-full opacity-50'
-                            onClick={() => handleFull(props.blockKey)}
-                            title='調整圖片寬度(80%/100%)'
-                        >
-                            <span className='material-icons justify-center self-center text-4xl'>crop_free</span>
-                        </div> */}
                         <div
                             className='text-red-800 flex p-2  hover:opacity-90 transform duration-300 cursor-pointer absolute top-2 right-2 rounded-full opacity-50'
                             onClick={props.handleDelete}
@@ -387,14 +402,26 @@ const DraftEditor = () => {
         const contentStateWithoutEntity = Modifier.applyEntity(contentState, selectionOfAtomicBlock, null);
         const editorStateWithoutEntity = EditorState.push(editorState, contentStateWithoutEntity, 'apply-entity');
 
-        // 移除 block
-        const contentStateWithoutBlock = Modifier.removeRange(contentStateWithoutEntity, selectionOfAtomicBlock, 'backward');
-        const newEditorState = EditorState.push(editorStateWithoutEntity, contentStateWithoutBlock, 'remove-range');
-
+        // 移除 block  (removeRange 會報錯，暫時用setBlockType 調整回unstyled方式處理)
+        const contentStateWithoutBlock = Modifier.setBlockType(contentStateWithoutEntity, selectionOfAtomicBlock, 'unstyled');
+        const newEditorState = EditorState.push(editorStateWithoutEntity, contentStateWithoutBlock, 'change-block-type');
         setEditorState(newEditorState);
+
+        //移除轉換後的block  移除尚不穩定暫用調整回unstyled
+        // const after = contentState.getBlockAfter(key);
+        // const selectionOfBlock = new SelectionState({
+        //     anchorKey: key,
+        //     anchorOffset: contentState.getBlockForKey(key).getText().length,
+        //     focusKey: after.getKey(),
+        //     focusOffset: 0,
+        // });
+        // console.log(selectionOfBlock);
+        // const removeBlock = Modifier.removeRange(contentStateWithoutBlock, selectionOfBlock, 'forward');
+
+        // setEditorState(EditorState.push(newEditorState, removeBlock, 'remove-range'));
     }
 
-    //input url value
+    //input url value 有url value 時執行
     useEffect(() => {
         if (urlValue !== '') {
             const contentState = editorState.getCurrentContent();
@@ -470,6 +497,7 @@ const DraftEditor = () => {
         }
         setShowLink(true);
     }
+    //輸入框
     const LinkInput = () => {
         const style = {
             display: showLink ? 'block' : 'none',
@@ -557,7 +585,6 @@ const DraftEditor = () => {
         }
     };
 
-    //middleware
     //確保運行於Window端 避免報錯
     useEffect(() => {
         seteditor(true);
@@ -594,10 +621,10 @@ const DraftEditor = () => {
                     <ToolBar />
                 </div>
                 {/* 開啟顯示原始資料 */}
-                {/* <div>
+                <div>
                     <h1 className='text-red-900'>RAW DATA 原始資料</h1>
                     {JSON.stringify(convertToRaw(editorState.getCurrentContent()))}
-                </div> */}
+                </div>
             </div>
             {/* 輸出成HTML格式 */}
             {/* <HtmlRender state={editorState.getCurrentContent()} /> */}

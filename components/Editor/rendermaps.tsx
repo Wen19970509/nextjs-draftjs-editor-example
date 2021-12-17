@@ -14,19 +14,7 @@ const emptyContentState = convertFromRaw({
         },
     ],
 });
-const emptyTitleState = convertFromRaw({
-    entityMap: {},
-    blocks: [
-        {
-            text: '',
-            key: 'title',
-            type: 'header-one',
-            entityRanges: [],
-            depth: 0,
-            inlineStyleRanges: [],
-        },
-    ],
-});
+
 //custom inline styleMap
 const inlineStyleMap = {
     STRIKETHROUGH: {
@@ -79,4 +67,4 @@ const blockStyleFn = (contentBlock) => {
     }
 };
 
-export { emptyContentState, emptyTitleState, inlineStyleMap, blockRenderMap, blockStyleFn };
+export { emptyContentState, inlineStyleMap, blockRenderMap, blockStyleFn };
