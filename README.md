@@ -1,7 +1,6 @@
 ### 使用方式
 
-    此為NextJS+TailwindCSS專案範本，內含常用模組，持續增加中
-    使用方法
+    此為NextJS+TailwindCSS專案範本，以NextJS+TailwindCSS完成基礎設定
 
     ```
     npm ci
@@ -28,15 +27,3 @@
     [插件](https://www.npmjs.com/package/tailwindcss-named-groups)
 -   `tailwindcss/aspect-ratio` 插件為提供照片顯示比例功能之插件 <br>
     [插件](https://www.npmjs.com/package/@tailwindcss/aspect-ratio)
-
-## Components
-
--   `CarouselBanner` <br>
-    輪播功能，可設定電腦版寬高比和手機版寬高比 <br>
-    可選是否傳入連結 or 僅圖片輪播
-
--   `TimeBox` <br>
-    顯示時間用
-
--   `ImageBox` <br>
-    傳入相片連結 可動態更改長寬比
