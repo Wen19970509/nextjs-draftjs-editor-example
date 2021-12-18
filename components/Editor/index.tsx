@@ -168,6 +168,7 @@ const DraftEditor: React.FC = () => {
             anchorOffset: 0,
             focusKey: anchorKey,
             focusOffset: end,
+            hasFocus: true,
         });
         const contentWithoutStyles = Modifier.replaceText(currentContent, selectedState, blockText, null);
 
@@ -592,11 +593,9 @@ const DraftEditor: React.FC = () => {
                     <ToolBar />
                 </div>
                 {/* 開啟顯示原始資料 */}
-                <div>
-                    <h1 className='text-red-900'>RAW DATA 原始資料</h1>
-                    {JSON.stringify(convertToRaw(editorState.getCurrentContent()))}
-                </div>
+                {/* <div>{JSON.stringify(convertToRaw(editorState.getCurrentContent()))}</div> */}
             </div>
+
             {/* 輸出成HTML格式 */}
             {/* <HtmlRender state={editorState.getCurrentContent()} /> */}
         </div>
