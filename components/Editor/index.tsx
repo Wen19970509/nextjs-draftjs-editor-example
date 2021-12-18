@@ -174,22 +174,27 @@ const DraftEditor = () => {
         padding: 2,
     } as React.CSSProperties;
 
-    function reSetStyles() {
+    //選取Block選項後 reset 所有inlineStyle，避免inlineStyle帶至Title Block
+    function resetHoleStyles() {
         const selectionState = editorState.getSelection();
         const anchorKey = selectionState.getAnchorKey();
         const currentContent = editorState.getCurrentContent();
-        const currentBlock = currentContent.getBlockForKey(anchorKey);
-        const start = selectionState.getStartOffset();
-        const end = selectionState.getEndOffset();
+        //區塊文字
+        const blockText = currentContent.getBlockForKey(anchorKey).getText();
+        //獲取區塊end值
+        const end = currentContent.getBlockForKey(anchorKey).getText().length;
         // Selected Text
-        const selectedText = currentBlock.getText().slice(start, end);
+        const selectedState = new SelectionState({
+            anchorKey: anchorKey,
+            anchorOffset: 0,
+            focusKey: anchorKey,
+            focusOffset: end,
+        });
+        const contentWithoutStyles = Modifier.replaceText(currentContent, selectedState, blockText, null);
 
-        console.log(selectionState);
-        const contentWithoutStyles = Modifier.replaceText(editorState.getCurrentContent(), selectionState, selectedText, null);
+        const newState = EditorState.push(editorState, contentWithoutStyles, 'change-inline-style');
 
-        const newstate = EditorState.push(editorState, contentWithoutStyles, 'change-inline-style');
-
-        setEditorState(newstate);
+        return newState;
     }
     //side toolbar 側邊工具列
     const SideToolbarBtn = ({ active, sideBarItem }) => {
@@ -199,13 +204,10 @@ const DraftEditor = () => {
                 setShowAddImg(true);
             } else if (sideBarItem.media === 'cards') {
                 addCard();
-            } else if (sideBarItem.type.match('header')) {
-                reSetStyles();
-                const newState = RichUtils.toggleBlockType(editorState, sideBarItem.type);
-
-                // setEditorState(newEditorState);
             } else {
-                setEditorState(RichUtils.toggleBlockType(editorState, sideBarItem.type));
+                //只要是更改block type 預設清除所有inline styles
+                const newState = resetHoleStyles();
+                setEditorState(RichUtils.toggleBlockType(newState, sideBarItem.type));
             }
         };
         const buttonStyle = {
