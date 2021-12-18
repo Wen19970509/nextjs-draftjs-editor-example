@@ -67,4 +67,26 @@ const blockStyleFn = (contentBlock) => {
     }
 };
 
-export { emptyContentState, inlineStyleMap, blockRenderMap, blockStyleFn };
+//sideBarItem 側欄工具列
+const sideBarItem = [
+    { label: 'title', type: 'header-two' },
+    { label: 'text_fields', type: 'header-three' },
+    { label: 'format_quote', type: 'blockquote' },
+    { label: 'format_list_bulleted', type: 'unordered-list-item' },
+    { label: 'format_list_numbered', type: 'ordered-list-item' },
+    { label: 'image', media: 'imageURL' },
+    //實驗性自訂元件區塊
+    // { label: 'apps', media: 'cards' },
+];
+
+//反白工具列
+const toolbarItems = [
+    { label: 'format_bold', style: 'BOLD' },
+    { label: 'format_italic', style: 'ITALIC' },
+    { label: 'format_underlined', style: 'UNDERLINE' },
+    { label: 'code', style: 'CODE' },
+    { label: 'format_strikethrough', style: 'STRIKETHROUGH' },
+    { label: 'insert_link', link: 'link' },
+];
+
+export { emptyContentState, inlineStyleMap, blockRenderMap, blockStyleFn, sideBarItem, toolbarItems };

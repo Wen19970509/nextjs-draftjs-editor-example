@@ -1,25 +1,13 @@
-import {
-    Editor,
-    EditorState,
-    RichUtils,
-    AtomicBlockUtils,
-    Modifier,
-    CompositeDecorator,
-    EditorBlock,
-    genKey,
-    ContentBlock,
-    convertToRaw,
-    SelectionState,
-} from 'draft-js';
+import { Editor, EditorState, RichUtils, AtomicBlockUtils, Modifier, EditorBlock, genKey, ContentBlock, convertToRaw, SelectionState } from 'draft-js';
 import { useEffect, useState, useRef } from 'react';
 import Immutable from 'immutable';
 import { keyBindingFn } from './keyBinding';
-import { emptyContentState, inlineStyleMap, blockRenderMap, blockStyleFn } from './rendermaps';
+import { emptyContentState, inlineStyleMap, blockRenderMap, blockStyleFn, sideBarItem, toolbarItems } from './rendermaps';
 import HyperLink from './HyperLink/service';
-//draft.css needs
+//引入Draft.css 提供DraftJS 預設css 設定
 import 'draft-js/dist/Draft.css';
 
-const DraftEditor = () => {
+const DraftEditor: React.FC = () => {
     const [editorState, setEditorState] = useState(EditorState.createWithContent(emptyContentState, HyperLink.decorator));
     const [editor, seteditor] = useState(false);
     const [showToolbar, setShowToolbar] = useState(false);
@@ -138,18 +126,9 @@ const DraftEditor = () => {
         );
     };
     const ToolBar = () => {
-        const toolbarItems = [
-            { label: 'format_bold', style: 'BOLD' },
-            { label: 'format_italic', style: 'ITALIC' },
-            { label: 'format_underlined', style: 'UNDERLINE' },
-            { label: 'code', style: 'CODE' },
-            { label: 'format_strikethrough', style: 'STRIKETHROUGH' },
-            { label: 'insert_link', link: 'link' },
-        ];
-
-        let currentStyle = editorState.getCurrentInlineStyle();
-        let currentBlockType = RichUtils.getCurrentBlockType(editorState);
-        let containsLink = RichUtils.currentBlockContainsLink(editorState); //檢測超連結
+        const currentStyle = editorState.getCurrentInlineStyle();
+        const currentBlockType = RichUtils.getCurrentBlockType(editorState);
+        const containsLink = RichUtils.currentBlockContainsLink(editorState); //檢測超連結
 
         return (
             <div>
@@ -220,16 +199,6 @@ const DraftEditor = () => {
         );
     };
     const SideToolBar = () => {
-        const sideBarItem = [
-            { label: 'title', type: 'header-two' },
-            { label: 'text_fields', type: 'header-three' },
-            { label: 'format_quote', type: 'blockquote' },
-            { label: 'format_list_bulleted', type: 'unordered-list-item' },
-            { label: 'format_list_numbered', type: 'ordered-list-item' },
-            { label: 'image', media: 'imageURL' },
-            // { label: 'apps', media: 'cards' },
-        ];
-
         let currentBlockType = RichUtils.getCurrentBlockType(editorState);
         return (
             <div className='bg-gray-800 fixed grid grid-flow-row left-24 rounded-md '>
