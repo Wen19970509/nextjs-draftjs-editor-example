@@ -75,6 +75,7 @@ const sideBarItem = [
     { label: 'format_list_bulleted', type: 'unordered-list-item' },
     { label: 'format_list_numbered', type: 'ordered-list-item' },
     { label: 'image', media: 'imageURL' },
+    { label: 'add_photo_alternate', media: 'imageUploader' },
     //實驗性自訂元件區塊
     // { label: 'apps', media: 'cards' },
 ];

@@ -184,6 +184,14 @@ const DraftEditor: React.FC = () => {
                 setShowAddImg(true);
             } else if (sideBarItem.media === 'cards') {
                 addCard();
+            } else if (sideBarItem.media === 'imageUploader') {
+                setShowImgUploader(true);
+                if (uploaderRef.current) {
+                    const focus = async () => {
+                        uploaderRef.current.focus();
+                    };
+                    uploaderRef.current.focus();
+                }
             } else {
                 //只要是更改block type 預設清除所有inline styles
                 const newState = resetHoleStyles();
@@ -280,6 +288,45 @@ const DraftEditor: React.FC = () => {
 
         return EditorState.push(editorState, newContent, 'split-block');
     }
+
+    //ImageUploader
+    const uploaderRef = useRef(null);
+    const [showImgUploader, setShowImgUploader] = useState(false);
+    const ImageUploader = () => {
+        const style = {
+            display: showImgUploader ? 'block' : 'none',
+        };
+        const handleInputClick = (e) => {
+            e.stopPropagation();
+        };
+        const handleInputChange = (e) => {
+            console.log(e.target.files);
+            const files = e.target.files;
+            if (files.length > 0) {
+                const file = files[0];
+                const reader = new FileReader();
+
+                reader.readAsDataURL(file);
+                reader.onload = (e) => {
+                    setUrlValue(e.target.result as string);
+                };
+            }
+            setShowImgUploader(false);
+        };
+
+        return (
+            <input
+                ref={uploaderRef}
+                className='fixed z-30 left-10 top-5'
+                style={style}
+                type='file'
+                accept='image/*'
+                onClick={handleInputClick}
+                onChange={handleInputChange}
+                multiple={false}
+            />
+        );
+    };
 
     // media 照片URL
     const [input, setInput] = useState('');
@@ -568,6 +615,7 @@ const DraftEditor: React.FC = () => {
             <SideToolBar />
             <ImageInput />
             <LinkInput />
+            <ImageUploader />
             <div className='Content text-xl flex-grow border border-gray-400 p-3 rounded-md' onClick={focusEditor}>
                 {editor && (
                     <Editor
