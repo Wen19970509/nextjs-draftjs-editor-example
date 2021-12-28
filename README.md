@@ -6,7 +6,7 @@
     npm ci
 
 
-    npm run  dev
+    npm run dev
     ```
 
 ## DraftJS Editor
